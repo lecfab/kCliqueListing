@@ -331,34 +331,7 @@ void Graph::setInOutAdj() {
 // = sum_u [ du+ + sum_(v in Nu+) dv-]
 // = m + sum_v dv- * dv-
 // So it seems to be a comlexity dmm
-long long LwithOrdering(Graph *g) {
-  long long ans = 0;
-  bool *mark = new bool[g->n]();
-  for (int i = 0; i < g->n; i++) { // for each node u
-    int u = i, v;
-    for (int j = 0; j < g->degv[u]; j++) { // for each successor v of u
-      v = g->adjv[g->cdv[u] + j];
-      for (int k = 0; k < g->indegv[v];
-           k++) { // mark each predecessor w of v: this loop shoud be outside of
-                  // the v loop!
-        int w = g->inadjv[g->incdv[v] + k];
-        mark[w] = true;
-      }
-      for (int k = 0; k < g->degv[u]; k++) { // take each successor w of u
-        int uw = g->adjv[g->cdv[u] + k];
-        if (mark[uw]) // if w is marked, count a triangle
-          ans++;
-      }
-      for (int k = 0; k < g->indegv[v]; k++) { // unmark
-        int w = g->inadjv[g->incdv[v] + k];
-        mark[w] = false;
-      }
-    }
-  }
-  delete[] mark;
-  return ans;
-}
-long long LwithOrdering_modified(Graph *g) { // Fabrice Lecuyer, 2021
+long long LwithOrdering(Graph *g) { // correction by F Lecuyer, 2021
   long long ans = 0;
   bool *mark = new bool[g->n]();
   for (int i = 0; i < g->n; i++) { // for each node u
@@ -444,28 +417,8 @@ int main(int argc, char **argv) {
          ((t2 - t1) % 3600) / 60, ((t2 - t1) % 60),
          (long int)(precis_t1_2 / 1e3));
   t1 = t2;
-  precis_t1 = precis_t2;
+  // precis_t1 = precis_t2;
 
-  // ------------------------- test modified version -------------------------
-  triNum = LwithOrdering_modified(g); // Degree or Smallest-first ordering
-
-  cout << "Number of triangles (modified): " << triNum << endl;
-
-  precis_t2 = high_resolution_clock::now();
-  precis_t1_2 =
-      chrono::duration_cast<chrono::microseconds>(precis_t2 - precis_t1)
-          .count();
-  precis_t0_2 =
-      chrono::duration_cast<chrono::microseconds>(precis_t2 - precis_t0)
-          .count();
-  // cout << "compute time: " << t1_2 / 1e6 << endl;
-  // cout << "Toltal time: " << t0_2 / 1e6 << endl;
-  t2 = time(NULL);
-  printf("- Time = %ldh%ldm%lds\t\t(%ldms)\n", (t2 - t1) / 3600,
-         ((t2 - t1) % 3600) / 60, ((t2 - t1) % 60),
-         (long int)(precis_t1_2 / 1e3));
-  t1 = t2;
-  // -------------------------------------------------------------------------
 
   printf("- Overall time = %ldh%ldm%lds\t\t(%ldms)\n", (t2 - t0) / 3600,
          ((t2 - t0) % 3600) / 60, ((t2 - t0) % 60),
